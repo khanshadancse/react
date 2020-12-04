@@ -4,15 +4,38 @@ import { connect } from 'react-redux';
 import { userActions } from '../_actions';
 
 import { Navbar, Nav } from 'react-bootstrap';
+
+import {AgGridReact} from 'ag-grid-react';
+
 class Auditpage extends React.Component {
     componentDidMount() {
-        this.props.getUsers();
+        this.props.getUsers(); 
     }
 
     handleDeleteUser(id) {
         return (e) => this.props.deleteUser(id);
     }
 
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            columnDefs: [
+                {headerName: 'Make', field: 'make', sortable: true, filter: true},
+                {headerName: 'Model', field: 'model', sortable: true, filter: true},
+                {headerName: 'Price', field: 'price', sortable: true, filter: true}
+
+            ],
+            rowData: []
+        }
+    }
+
+    componentDidMount() {
+        fetch('https://raw.githubusercontent.com/ag-grid/ag-grid/master/grid-packages/ag-grid-docs/src/sample-data/rowData.json')
+            .then(result => result.json())
+            .then(rowData => this.setState({rowData}))
+    }
     render() {
         const { user, users } = this.props;
         return (
@@ -25,10 +48,21 @@ class Auditpage extends React.Component {
                         <Nav.Link> <Link to="/login">Logout</Link></Nav.Link>
                     </Nav>
                 </Navbar>
-                <div className="col-md-6 col-md-offset-3">
-
-                    <h1>Hi {user.firstName}!</h1>
+                <div className="col-md-12">
+                <h3>Hi {user.firstName}!</h3>
                     <p>You're logged in with React!!</p>
+                <p>DATA TABLE</p>
+                    <div
+                className="ag-theme-balham"
+                style={{ height: '400px', width: '600px' }}
+            >
+                <AgGridReact
+                    columnDefs={this.state.columnDefs}
+                    rowData={this.state.rowData} pagination = {true} paginationPageSize = {10}>
+                </AgGridReact>
+            </div>
+                </div>
+                <div className="col-md-12">
                     <h3>All login audit :</h3>
                     {users.loading && <em>Loading users...</em>}
                     {users.error && <span className="text-danger">ERROR: {users.error}</span>}
@@ -48,6 +82,7 @@ class Auditpage extends React.Component {
 
                         </ul>
                     }
+                    
                 </div>
             </div>
         );
